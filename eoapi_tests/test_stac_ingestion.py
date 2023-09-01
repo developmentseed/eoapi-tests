@@ -23,12 +23,8 @@ def test_validate_item(test_item):
 pytest.mark.order(2)
 
 
-def test_insert_collection(
-    stac_ingestion_instance, authentication_token, test_collection
-):
-    response = stac_ingestion_instance.insert_collection(
-        authentication_token, test_collection
-    )
+def test_insert_collection(stac_ingestion_instance, test_collection):
+    response = stac_ingestion_instance.insert_collection(test_collection)
     assert response.status_code in [
         200,
         201,
@@ -41,8 +37,8 @@ def test_insert_collection(
 pytest.mark.order(3)
 
 
-def test_insert_item(stac_ingestion_instance, authentication_token, test_item):
-    response = stac_ingestion_instance.insert_item(authentication_token, test_item)
+def test_insert_item(stac_ingestion_instance, test_item):
+    response = stac_ingestion_instance.insert_item(test_item)
     assert response.status_code in [
         200,
         201,
@@ -112,12 +108,8 @@ def test_query_items(stac_ingestion_instance, test_collection, test_item):
 pytest.mark.order(7)
 
 
-def test_delete_collection(
-    stac_ingestion_instance, authentication_token, test_collection
-):
-    response = stac_ingestion_instance.delete_collection(
-        authentication_token, test_collection["id"]
-    )
+def test_delete_collection(stac_ingestion_instance, test_collection):
+    response = stac_ingestion_instance.delete_collection(test_collection["id"])
     assert response.status_code in [
         200,
         201,

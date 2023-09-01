@@ -15,6 +15,7 @@ class StacIngestion:
     def __init__(self):
         self.eoapi_deployment_settings = eoapiDeploymentSettings()
         self.current_file_path = os.path.dirname(os.path.abspath(__file__))
+        self.headers = self.get_headers()
 
     def validate_collection(self, collection):
         try:
@@ -28,8 +29,10 @@ class StacIngestion:
         except STACValidationError:
             raise STACValidationError("Validation failed for the item")
 
-    def get_authentication_token(self):
-        # session = boto3.session.Session()
+    def get_authentication_token(self) -> str:
+        if not self.eoapi_deployment_settings.secret_id:
+            raise ValueError("You should provide a secret id")
+
         client = boto3.client("secretsmanager", region_name="us-west-2")
 
         try:
@@ -69,23 +72,31 @@ class StacIngestion:
         token = res_token.json()["access_token"]
         return token
 
-    def insert_collection(self, token, collection):
-        headers = {"Authorization": f"bearer {token}"}
+    def get_headers(self) -> dict:
+        if self.eoapi_deployment_settings.secret_id:
+            return {
+                "headers": {
+                    "Authorization": f"bearer {self.get_authentication_token()}"
+                }
+            }
+        else:
+            return {"params": {"provided_by": "eoapi-tests"}}
+
+    def insert_collection(self, collection):
         response = requests.post(
             self.eoapi_deployment_settings.ingestor_url
             + self.eoapi_deployment_settings.collections_endpoint,
             json=collection,
-            headers=headers,
+            **self.headers,
         )
         return response
 
-    def insert_item(self, token, item):
-        headers = {"Authorization": f"bearer {token}"}
+    def insert_item(self, item):
         response = requests.post(
             self.eoapi_deployment_settings.ingestor_url
             + self.eoapi_deployment_settings.items_endpoint,
             json=item,
-            headers=headers,
+            **self.headers,
         )
         return response
 
@@ -145,12 +156,11 @@ class StacIngestion:
             test_titiler_search_request = json.load(f)
         return test_titiler_search_request
 
-    def delete_collection(self, token, collection_id):
-        headers = {"Authorization": f"bearer {token}"}
+    def delete_collection(self, collection_id):
         response = requests.delete(
             self.eoapi_deployment_settings.ingestor_url
             + self.eoapi_deployment_settings.collections_endpoint
             + f"/{collection_id}",
-            headers=headers,
+            **self.headers,
         )
         return response
