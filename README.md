@@ -1,2 +1,4 @@
 # eoapi-tests
-tests for the eoAPI suite
+
+(Work in progress) Standard tests for a suite of deployed [eoAPI](https://github.com/developmentseed/eoAPI) services. 
+
