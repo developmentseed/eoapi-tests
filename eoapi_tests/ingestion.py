@@ -1,17 +1,18 @@
-import requests
 import json
-import pystac
-from pystac import STACValidationError
 import os
+
 import boto3
-from eoapi_tests.settings import eoapiDeploymentSettings
+import pystac
+import requests
+from pystac import STACValidationError
+from settings import eoapiDeploymentSettings
+
 
 class StacIngestion:
 
     """Class representing various test operations"""
 
     def __init__(self):
-        
         self.eoapi_deployment_settings = eoapiDeploymentSettings()
         self.current_file_path = os.path.dirname(os.path.abspath(__file__))
 
@@ -28,16 +29,19 @@ class StacIngestion:
             raise STACValidationError("Validation failed for the item")
 
     def get_authentication_token(self):
-
         # session = boto3.session.Session()
         client = boto3.client("secretsmanager", region_name="us-west-2")
 
         try:
-            res_secret = client.get_secret_value(SecretId=self.eoapi_deployment_settings.secret_id)
+            res_secret = client.get_secret_value(
+                SecretId=self.eoapi_deployment_settings.secret_id
+            )
         except client.exceptions.ResourceNotFoundException:
             raise Exception(
-                f"Unable to find a secret for '{self.eoapi_deployment_settings.secret_id}'. "
-                "\n\nHint: Check your stage and service id. Also, verify that the correct "
+                "Unable to find a secret for "
+                "{self.eoapi_deployment_settings.secret_id}. "
+                "\n\nHint: Check your stage and service id."
+                "Also, verify that the correct "
                 "AWS_PROFILE is set on your environment."
             )
 
@@ -56,7 +60,8 @@ class StacIngestion:
             auth=(client_id, client_secret),
             data={
                 "grant_type": "client_credentials",
-                # A space-separated list of scopes to request for the generated access token.
+                # A space-separated list of scopes
+                # to request for the generated access token.
                 "scope": scope,
             },
         )
@@ -67,7 +72,8 @@ class StacIngestion:
     def insert_collection(self, token, collection):
         headers = {"Authorization": f"bearer {token}"}
         response = requests.post(
-            self.eoapi_deployment_settings.ingestor_url + self.eoapi_deployment_settings.collections_endpoint,
+            self.eoapi_deployment_settings.ingestor_url
+            + self.eoapi_deployment_settings.collections_endpoint,
             json=collection,
             headers=headers,
         )
@@ -76,32 +82,41 @@ class StacIngestion:
     def insert_item(self, token, item):
         headers = {"Authorization": f"bearer {token}"}
         response = requests.post(
-            self.eoapi_deployment_settings.ingestor_url + self.eoapi_deployment_settings.items_endpoint, json=item, headers=headers
+            self.eoapi_deployment_settings.ingestor_url
+            + self.eoapi_deployment_settings.items_endpoint,
+            json=item,
+            headers=headers,
         )
         return response
 
     def query_collection(self, collection_id):
         response = requests.get(
-            self.eoapi_deployment_settings.stac_api_url + self.eoapi_deployment_settings.collections_endpoint + f"/{collection_id}"
+            self.eoapi_deployment_settings.stac_api_url
+            + self.eoapi_deployment_settings.collections_endpoint
+            + f"/{collection_id}"
         )
         return response
 
     def query_items(self, collection_id):
         response = requests.get(
-            self.eoapi_deployment_settings.stac_api_url + self.eoapi_deployment_settings.collections_endpoint + f"/{collection_id}/items"
+            self.eoapi_deployment_settings.stac_api_url
+            + self.eoapi_deployment_settings.collections_endpoint
+            + f"/{collection_id}/items"
         )
         return response
 
     def register_mosaic(self, search_request):
         response = requests.post(
-            self.eoapi_deployment_settings.titiler_pgstac_api_url + "/mosaic/register", json=search_request
+            self.eoapi_deployment_settings.titiler_pgstac_api_url + "/mosaic/register",
+            json=search_request,
         )
         return response
 
     def list_mosaic_assets(self, search_id):
         """list the assets of the first tile"""
         response = requests.get(
-            self.eoapi_deployment_settings.titiler_pgstac_api_url + f"/mosaic/{search_id}/tiles/0/0/0/assets"
+            self.eoapi_deployment_settings.titiler_pgstac_api_url
+            + f"/mosaic/{search_id}/tiles/0/0/0/assets"
         )
         return response
 
@@ -133,7 +148,9 @@ class StacIngestion:
     def delete_collection(self, token, collection_id):
         headers = {"Authorization": f"bearer {token}"}
         response = requests.delete(
-            self.eoapi_deployment_settings.ingestor_url + self.eoapi_deployment_settings.collections_endpoint + f"/{collection_id}",
+            self.eoapi_deployment_settings.ingestor_url
+            + self.eoapi_deployment_settings.collections_endpoint
+            + f"/{collection_id}",
             headers=headers,
         )
         return response

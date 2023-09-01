@@ -1,8 +1,9 @@
-from pydantic_settings import BaseSettings
 from typing import Optional
 
-class eoapiDeploymentSettings(BaseSettings):
+from pydantic_settings import BaseSettings
 
+
+class eoapiDeploymentSettings(BaseSettings):
     ingestor_url: str
     stac_api_url: str
     titiler_pgstac_api_url: str
