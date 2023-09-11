@@ -3,7 +3,7 @@ import time
 import pystac
 import pytest
 
-INSERTION_WAIT_TIME = 30
+INSERTION_WAIT_TIME = 10
 
 # Test validating the collection
 pytest.mark.order(0)
