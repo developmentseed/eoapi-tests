@@ -3,6 +3,8 @@ import time
 import pystac
 import pytest
 
+INSERTION_WAIT_TIME = 30
+
 # Test validating the collection
 pytest.mark.order(0)
 
@@ -30,7 +32,7 @@ def test_insert_collection(stac_ingestion_instance, test_collection):
         201,
     ], f"Failed to insert the test_collection :\n{response.text}"
     # Wait for the collection to be inserted
-    time.sleep(10)
+    time.sleep(INSERTION_WAIT_TIME)
 
 
 # Test inserting item
@@ -44,7 +46,7 @@ def test_insert_item(stac_ingestion_instance, test_item):
         201,
     ], f"Failed to insert the test_item :\n{response.text}"
     # Wait for the item to be inserted
-    time.sleep(10)
+    time.sleep(INSERTION_WAIT_TIME)
 
 
 # Test querying collection and verifying inserted collection
@@ -75,7 +77,7 @@ def test_titiler_pgstac(
     ], f"Failed to register the mosaic :\n{register_response.text}"
     search_id = register_response.json()["searchid"]
     # allow for some time for the mosaic to be inserted
-    time.sleep(10)
+    time.sleep(INSERTION_WAIT_TIME)
     asset_query_response = stac_ingestion_instance.list_mosaic_assets(search_id)
     assert asset_query_response.status_code in [
         200,
